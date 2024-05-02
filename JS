@@ -1,10 +1,11 @@
 let question_field = document.querySelector('.question')
 let answer_buttons = document.querySelectorAll('.answer')
+let main_container = document.querySelector('.main')
+let container_h3 = document.querySelector('.container_h3')
+let start_button = document.querySelector('.start_button')
 
-let sign_array = ['+', '-', '*', '/']
-
-function RandomSign(){
-    return sign_array[randint(0, 3)]
+function randint(min, max){
+    return Math.round(Math.random()* (max-min) + min)
 }
 
 function shuffle(array) {
@@ -16,19 +17,20 @@ function shuffle(array) {
     [array[currentIndex], array[randomIndex]] = [   
       array[randomIndex], array[currentIndex]];
   }
-  return array; 
+  return array;
 }
 
+let sign_array = ['+', '-', '*', '/']
+function getRandomSign(){
+    return sign_array[randint(0, 3)]
+}
 
-class Question{
+class Question {
     constructor(question, answer_1, answer_2, correct, answer_4, answer_5){
         let a = randint(1, 30)
         let b = randint(1, 30)
-        let sign = RandomSign()
-
-        this.question = `${a} ${sign} ${b}`
-        if (sign == '+')
-        {
+        let sign = getRandomSign()
+        if (sign == '+'){
             this.correct = a + b
         }
         else if (sign == '-'){
@@ -40,43 +42,74 @@ class Question{
         else if (sign == '/'){
             this.correct = a / b
         }
-        
+
+        this.question = `${a} ${sign} ${b}`
         this.answers = [
-            randint(this.correct-5, this.correct+5),
-            randint(this.correct-5, this.correct+5),
+            randint(this.correct-10, this.correct+10),
+            randint(this.correct-10, this.correct+10),
             this.correct,
-            randint(this.correct-5, this.correct+5),
-            randint(this.correct-5, this.correct+5),
+            randint(this.correct-10, this.correct+10),
+            randint(this.correct-10, this.correct+10)
         ]
         shuffle(this.answers)
     }
-
     display(){
         question_field.innerHTML = this.question
-        for (let i = 0; i < this.answers.length; i += 1){
+        for (let i = 0; i < this.answers.length; i+= 1){
             answer_buttons[i].innerHTML = this.answers[i]
         }
     }
 }
 
-function randint(min, max){
-    return Math.round(Math.random() * (max - min) + min)
-}
-
-
-let current_question
 let total_answers_given = 0
-current_question = new Question()
-current_question.display()
+let correct_answers = 0
+let current_question
 
 
-for (let i = 0; i < answer_buttons.length; i +=1){
+
+start_button.addEventListener('click', function(){
+    main_container.style.display = 'flex'
+    start_button.style.display = 'none'
+    container_h3.style.display = 'none'
+    current_question = new Question()
+    current_question.display()
+
+    setTimeout(function(){
+    main_container.style.display = 'none'
+    start_button.style.display = 'flex'
+    container_h3.style.display = 'flex'
+    container_h3.innerHTML = `Has acertado ${correct_answers} de ${total_answers_given}.
+    Tu tasa de acierto es de un ${(Math.round(correct_answers/total_answers_given*100))}%`
+    }, 10000)
+})
+
+
+
+
+for (let i = 0; i < answer_buttons.length; i+=1){
     answer_buttons[i].addEventListener('click', function(){
         if (answer_buttons[i].innerHTML == current_question.correct){
             console.log("Correcto")
+            correct_answers += 1
+            answer_buttons[i].style.background = '#008000'
+            anime({
+                targets: answer_buttons[i],
+                duration: 200,
+                background: '#FFFFFF',
+                delay: 50,
+                easing: 'linear'
+            })
         }
         else{
             console.log("Incorrecto")
+            answer_buttons[i].style.background = '#FF0000'
+            anime({
+                targets: answer_buttons[i],
+                duration: 200,
+                background: '#FFFFFF',
+                delay: 50,
+                easing: 'linear'
+            })
         }
         total_answers_given += 1
         current_question = new Question()
